@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"path"
+
+	"github.com/goplusjs/gopherjs/cmd/gopherjs-ng/gotool"
 )
 
 func run(ctx context.Context) error {
@@ -16,13 +18,18 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("command verb not specified")
 	}
 
+	tool, err := gotool.Discover()
+	if err != nil {
+		return err
+	}
+
 	verb, args := args[0], args[1:]
 
 	switch verb {
 	case "adaptor":
 		return adaptor(ctx, args...)
-	case "build":
-		return build(ctx, args...)
+	case "build", "test", "install":
+		return tool.Run(ctx, verb, args...)
 	default:
 		return fmt.Errorf("unknown command verb %q", verb)
 	}
