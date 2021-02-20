@@ -54,6 +54,7 @@ func TestRun(t *testing.T) {
 func TestGOROOT(t *testing.T) {
 	defer restoreEnv()()
 	os.Setenv("GOPATH", t.TempDir()) // Doesn't matter which, as long as it's set.
+	os.Setenv("GOCACHE", t.TempDir())
 
 	tool := mustDiscover(t)
 
@@ -63,6 +64,21 @@ func TestGOROOT(t *testing.T) {
 
 	if got, want := tool.GOROOT(context.Background()), runtime.GOROOT(); got != want {
 		t.Errorf("tool.GOROOT() returned %q, want %q", got, want)
+	}
+}
+
+func TestVersion(t *testing.T) {
+	defer restoreEnv()()
+	os.Setenv("GOPATH", t.TempDir()) // Doesn't matter which, as long as it's set.
+
+	tool := mustDiscover(t)
+
+	if want := path.Join(runtime.GOROOT(), "bin", "go"); tool.Path != want {
+		t.Errorf("Discovered Go tool %q, want %q", tool.Path, want)
+	}
+
+	if got, want := tool.Version(context.Background()), runtime.Version(); got != want {
+		t.Errorf("tool.Version() returned %q, want %q", got, want)
 	}
 }
 

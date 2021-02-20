@@ -85,11 +85,28 @@ func (t GoTool) Run(ctx context.Context, subcmd string, args ...string) error {
 // GOROOT returns the result of `go env GOROOT`, or panics if execution fails.
 func (t GoTool) GOROOT(ctx context.Context) string {
 	cmd := exec.CommandContext(ctx, t.Path, "env", "GOROOT")
-	output, err := cmd.CombinedOutput()
+	cmd.Stderr = os.Stderr
+	output, err := cmd.Output()
 	if err != nil {
-		os.Stderr.Write(output)
 		panic(fmt.Sprintf("%s failed: %s", cmd, err)) // This should never happen.
 	}
 	// TODO: Cache result.
 	return strings.TrimRight(string(output), "\r\n")
+}
+
+// Version of the Go toolchain in go1.x.y format.
+func (t GoTool) Version(ctx context.Context) string {
+	cmd := exec.CommandContext(ctx, t.Path, "version")
+	cmd.Stderr = os.Stderr
+	output, err := cmd.Output()
+	if err != nil {
+		panic(fmt.Sprintf("%s failed: %s", cmd, err)) // This should never happen.
+	}
+	outputStr := string(output)
+	parts := strings.Split(outputStr, " ")
+	if len(parts) != 4 {
+		panic(fmt.Sprintf("unexpected `go version` output: %q", outputStr))
+	}
+	// TODO: Cache result.
+	return parts[2]
 }

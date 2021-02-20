@@ -7,6 +7,7 @@ import (
 	"log"
 	"path"
 
+	"github.com/goplusjs/gopherjs/cmd/gopherjs-ng/goroot"
 	"github.com/goplusjs/gopherjs/cmd/gopherjs-ng/gotool"
 )
 
@@ -30,6 +31,13 @@ func run(ctx context.Context) error {
 		return adaptor(ctx, args...)
 	case "build", "test", "install":
 		return tool.Run(ctx, verb, args...)
+	case "vroot":
+		vroot, err := goroot.New(ctx, tool).VirtualGOROOT()
+		if err != nil {
+			return fmt.Errorf("failed to set up virtual GOROOT: %w", err)
+		}
+		fmt.Println(vroot)
+		return nil
 	default:
 		return fmt.Errorf("unknown command verb %q", verb)
 	}
